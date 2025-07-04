@@ -14,6 +14,9 @@ builder.Services
     .AddMediatRWithAssemblies(userAssembly);
 
 builder.Services
+    .AddCapWithRabbitMq(builder.Configuration);
+
+builder.Services
     .AddUserModule(builder.Configuration);
 
 builder.Services.AddControllers();
