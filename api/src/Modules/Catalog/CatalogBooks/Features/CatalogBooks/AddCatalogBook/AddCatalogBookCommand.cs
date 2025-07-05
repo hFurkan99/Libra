@@ -1,6 +1,5 @@
 ﻿namespace Catalog.CatalogBooks.Features.CatalogBooks.AddCatalogBook;
 public record AddCatalogBookCommand(
-    Guid Id,
     string Title,
     string Isbn,
     Guid AuthorId,
@@ -13,9 +12,6 @@ public class AddCatalogBookCommandValidator : AbstractValidator<AddCatalogBookCo
 {
     public AddCatalogBookCommandValidator()
     {
-        RuleFor(x => x.Id)
-            .NotEmpty().WithMessage("Id cannot be empty.");
-
         RuleFor(x => x.Title)
             .NotEmpty().WithMessage("Title cannot be empty.")
             .MaximumLength(200).WithMessage("Title cannot be longer than 200 characters.");

@@ -9,9 +9,7 @@ public class CatalogBook : Aggregate<Guid>
     public Author? Author { get; private set; }
     public Category? Category { get; private set; }
 
-    protected CatalogBook()
-    {
-    }
+    protected CatalogBook() {}
 
     private CatalogBook(Guid id, string title, Isbn isbn, Guid authorId, Guid categoryId)
     {
@@ -30,6 +28,10 @@ public class CatalogBook : Aggregate<Guid>
         if (isbn is null)
             throw new ArgumentNullException(nameof(isbn), "ISBN cannot be null.");
 
-        return new CatalogBook(id, title, isbn, authorId, categoryId);
+        var catalogBook = new CatalogBook(id, title, isbn, authorId, categoryId);
+
+        catalogBook.AddDomainEvent(new CatalogBookCreatedDomainEvent(id, title, isbn.Value));
+
+        return catalogBook;
     }
 }

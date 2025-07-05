@@ -6,18 +6,22 @@ builder.Host
     config.ReadFrom.Configuration(context.Configuration));
 
 var userAssembly = typeof(UserModule).Assembly;
+var catalogAssembly = typeof(CatalogModule).Assembly;
 
 builder.Services
-    .AddCarterWithAssemblies(userAssembly);
+    .AddCarterWithAssemblies(userAssembly, 
+    catalogAssembly);
 
 builder.Services
-    .AddMediatRWithAssemblies(userAssembly);
+    .AddMediatRWithAssemblies(userAssembly,
+    catalogAssembly);
 
 builder.Services
     .AddCapWithRabbitMq(builder.Configuration);
 
 builder.Services
-    .AddUserModule(builder.Configuration);
+    .AddUserModule(builder.Configuration)
+    .AddCatalogModule(builder.Configuration);
 
 builder.Services.AddControllers();
 
@@ -58,7 +62,8 @@ app.MapGet("/", context =>
 app.UseSerilogRequestLogging();
 app.UseExceptionHandler(options => { });
 
-app.UseUserModule();
+app.UseUserModule()
+    .UseCatalogModule();
 
 app.MapControllers();
 app.MapCarter();

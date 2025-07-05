@@ -1,22 +1,26 @@
 ﻿namespace Catalog.CatalogBooks.Features.CatalogBooks.AddCatalogBook;
 internal class AddCatalogBookHandler(
     CatalogDbContext dbContext,
-    ICapPublisher capBus)
+    ICapPublisher capPublisher)
     : ICommandHandler<AddCatalogBookCommand, AddCatalogBookResult>
 {
     public async Task<AddCatalogBookResult> Handle(
         AddCatalogBookCommand request,
         CancellationToken cancellationToken)
     {
-        using var tx = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-        
+        using var transaction = await dbContext.Database
+            .BeginTransactionAsync(cancellationToken);
+
         var catalogBook = CreateCatalogBook(request);
+
         dbContext.CatalogBooks.Add(catalogBook);
 
-        await PublishAsync(catalogBook, cancellationToken);
-
         await dbContext.SaveChangesAsync(cancellationToken);
-        await tx.CommitAsync(cancellationToken);
+        await capPublisher.PublishAsync("catalog.catalogbooks.created",
+            CreateIntegrationEvent(catalogBook), cancellationToken: cancellationToken);
+
+        await transaction.CommitAsync(cancellationToken);
+
         return new AddCatalogBookResult(catalogBook.Id);
     }
 
@@ -30,21 +34,13 @@ internal class AddCatalogBookHandler(
             request.CategoryId);
     }
 
-    private async Task PublishAsync(CatalogBook catalogBook, CancellationToken cancellationToken)
-    {
-        await capBus.PublishAsync(
-            "catalog.catalogbooks.added",
-            CreateIntegrationEvent(catalogBook),
-            cancellationToken: cancellationToken);
-    }
-
     private static CatalogBookCreatedIntegrationEvent CreateIntegrationEvent(CatalogBook catalogBook)
     {
         return new CatalogBookCreatedIntegrationEvent
         {
             CatalogBookId = catalogBook.Id,
             Isbn = catalogBook.Isbn.Value,
-            Title = catalogBook.Title,
+            Title = catalogBook.Title
         };
     }
 }
