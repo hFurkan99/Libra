@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Modules\Book\Book.csproj" />
     <ProjectReference Include="..\..\Modules\Catalog\Catalog.csproj" />
     <ProjectReference Include="..\..\Modules\User\User.csproj" />
   </ItemGroup>
